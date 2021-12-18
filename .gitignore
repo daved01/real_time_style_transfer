@@ -127,3 +127,16 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Other
+.DS_Store
+
+# Dev files
+README-ng.md
+spec.md
+
+# Folders
+generated/*
+data/content/*
+data/style/*
+models/*

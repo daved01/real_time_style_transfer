@@ -1,0 +1,22 @@
+# Paths
+content_image_path: "./data/content/"
+style_image_path: "./data/style/"
+model_weights_path: "models/71images/"
+generated_image_path: "generated/71images/"
+
+
+# Set training image size. Format (height, width)
+image_size:
+  tuple:
+    - 256
+    - 256
+
+# Define layers and their shapes for perceptual loss
+style_layers:
+  block1_conv2: [256,256,64]
+  block2_conv2: [128,128,128]
+  block3_conv3: [64,64,256]
+  block4_conv3 : [32,32,512]
+    
+content_layers:
+  block3_conv3: [64,64,256]
