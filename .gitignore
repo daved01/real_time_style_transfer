@@ -136,7 +136,14 @@ README-ng.md
 spec.md
 
 # Folders
-generated/*
 data/content/*
+!data/content/.gitignore
+
 data/style/*
+!data/style/.gitignore
+
+generated/*
+!generated/.gitignore
+
 models/*
+!models/.gitignore
