@@ -147,3 +147,5 @@ generated/*
 
 models/*
 !models/.gitignore
+
+experiments.csv

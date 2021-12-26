@@ -74,6 +74,7 @@ def generate_image(content_image_path, generated_image_path, model_weights_path,
 
 
 def show_image():
+    # Still required?
     pass
 
 
@@ -84,26 +85,30 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Convert an input image into a selected style.")
     parser.add_argument('--model', default=None, help="Provide the name of a model in the models folder or flag 'all' to iterate over all models.")
     parser.add_argument('--image', default=None, help="Provide the name of a content image in the folder data/content.")
-    parser.add_argument('-showimage', default=False, help="Shows the generated image in a window if set.") # TODO: implement
+    parser.add_argument('-allModels', default=None, help="Iterates through all models in the model path. Set the path in configuration.yaml.")
+    #parser.add_argument('-showimage', default=False, help="Shows the generated image in a window if set.") # TODO: implement
 
     args = parser.parse_args()
     model_name = args.model
     image_name = args.image
-    show_image_flag = args.showimage
+    run_all_models = args.allModels
+    #show_image_flag = args.showimage
 
     # Check inputs
+    if model_name != None and run_all_models != None:
+        print("Error! Provide a model_name or the flag -allModels.")
+        exit()
 
 
-    # Run model and save generated image to folder generated
+    # Run model and save generated image to folder generated.
     print("\n==============================\nTransforming the image...\n")
     content_image_path, generated_image_path, model_weights_path = utils.get_configuration_paths()
-    if model_name != "all":
+    if model_name != None:
         generate_image(content_image_path, generated_image_path, model_weights_path, image_name, model_name)
     else:
-        # Get all model names in folder and iterate over them
+        # Get all model names in folder and iterate over them.
         model_names = [file for file in os.listdir(model_weights_path) if file.endswith(".h5")]
         print("Found {:.0f} models!".format(len(model_names)))
         for model_name in model_names:
-            #print(model_name)
             generate_image(content_image_path, generated_image_path, model_weights_path, image_name, model_name)
     print("\n==============================\nDone!")
