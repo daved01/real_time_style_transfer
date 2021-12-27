@@ -43,7 +43,7 @@ def compute_content_loss(generated, content, dimensions):
     scaling_factor = (int(height/4) * int(width/4) * channels) # H, W, C
 
     # Sum over all elements, including the batch_size to get average loss over the batch.
-    content_reconstruction_loss =  tf.math.reduce_sum(tf.square(generated - content)) / (scaling_factor * generated.shape[0])
+    content_reconstruction_loss = tf.math.reduce_sum(tf.square(generated - content)) / (scaling_factor * generated.shape[0])
     return content_reconstruction_loss
 
 
