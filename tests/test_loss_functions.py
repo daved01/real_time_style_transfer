@@ -41,12 +41,23 @@ def test_compute_content_loss():
     assert(content_reconstruction_loss == tf.constant([0.5]))
 
 
-
-
 def test_compute_style_loss():
-    assert(1 == 2)
+    gen1 = tf.ones((1,4,4,1)) * 2
+    st1 = tf.ones((1,4,4,1))
+    dim1 = [4,4,1]
 
-def test_compute_loss_and_grads():
-    assert(1 == 2)
+    gen2 = tf.ones((8,12,12,1)) * 2
+    st2 = tf.ones((8,12,12,1))
+    dim2 = [12,12,1]
 
+    gen3 = tf.ones((1,4,4,3)) * 2
+    st3 = tf.ones((1,4,4,3))
+    dim3 = [4,4,3]
 
+    y1 = loss_functions.compute_style_loss(gen1, st1, dim1)
+    y2 = loss_functions.compute_style_loss(gen2, st2, dim2)
+    y3 = loss_functions.compute_style_loss(gen3, st3, dim3)
+
+    assert(y1 == tf.constant([9.0]))
+    assert(y2 == tf.constant([9.0]))
+    assert(y3 == tf.constant([9.0]))
