@@ -1,19 +1,43 @@
+import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
 
 from modules.reflection_padding import ReflectionPadding2D
 from modules.blocks import Blocks
 
-
 def get_supported_architecture_names():
     """
     List of supported network architectures.
     """
-    return ["transformNetwork", "miniNetwork"]
+    models = {
+        "transformNet": "xxx parameters, deconvolutions, residual blocks", 
+        "transformNetConvs": "Like transformNet with deconvs replaced by convs and bilinear upsampling", 
+        "mediumNet": "xxx parameters, convolutions and bilinear upsampling", 
+        "tinyNet": "xxx parameters, convolutions and bilinear upsampling"
+    }
+    return models
+
+
+def load_architecture(model):
+    models = get_supported_architecture_names()
+    if model not in models.keys():
+        print("Error! Selected network architecture is not supported. Please check the configuration file.\nSupported are:\n")
+        [print(model, ":\t\t", models[model]) for model in models]
+        return -1
+    # Load architecture
+    if model == "transformNet":
+        return get_transform_net()
+    elif model == "transformNetConvs":
+        return get_transform_net_convs()
+    elif model == "mediumNet":
+        return get_medium_net()
+    elif model == "tinyNet":
+        return get_tiny_net()
+
 
 
 ### Transform network ###
-def get_transformation_model():
+def get_transform_net():
     """
     Loads the transformation network.
     """
@@ -50,11 +74,68 @@ def get_transformation_model():
 
     outputs = layers.Conv2DTranspose(filters=3, kernel_size=(9,9), strides=(1,1), activation="tanh", padding='same', name="Conv4")(x)
 
-    return keras.Model(inputs=inputs, outputs=outputs, name="Transform_network")
+    return keras.Model(inputs=inputs, outputs=outputs, name="transformNet")
 
 
-### Mini network ###
-def get_mini_model():
+
+### Transform network with convolutions ###
+def get_transform_net_convs():
+    """
+    Loads the transformation network.
+    """
+
+    inputs = keras.Input(shape=(256,256,3), name="InputLayer")
+
+    # Reflection padding
+    padding = ReflectionPadding2D()
+    padding._name = "Reflection"
+    x = padding(inputs)
+   
+    x = layers.Conv2D(filters=32, kernel_size=(9,9),strides=(1,1), activation="relu", padding='same', name="Conv1")(x)
+    x = layers.BatchNormalization(scale=True)(x)
+
+    x = layers.Conv2D(filters=64, kernel_size=(3,3),strides=(2,2), activation="relu", padding='same', name="Conv2")(x) 
+    x = layers.BatchNormalization(scale=True)(x)
+
+    x = layers.Conv2D(filters=128, kernel_size=(3,3),strides=(2,2), activation="relu", padding='same', name="Conv3")(x)
+    x = layers.BatchNormalization(scale=True)(x)
+
+    # Residual blocks
+    x = Blocks.residual_block(128,"1", x)
+    x = Blocks.residual_block(128,"2", x)
+    x = Blocks.residual_block(128,"3", x)
+    x = Blocks.residual_block(128,"4", x)
+    x = Blocks.residual_block(128,"5", x)
+
+    # Deconvolutions
+    paddings = tf.constant([[0,0],[2,2],[2,2],[0,0]])
+    x = tf.image.resize(x, size=[253,253], method=tf.image.ResizeMethod.BILINEAR) #257
+    x = tf.pad(x, paddings)
+    x = layers.Conv2D(filters=64, kernel_size=(3,3), strides=(2,2), activation="relu", padding='valid', name="Deconv1")(x)
+    x = layers.BatchNormalization(scale=True)(x)
+
+    x = tf.image.resize(x, size=[510,510], method=tf.image.ResizeMethod.BILINEAR) # 514
+    x = tf.pad(x, paddings)
+    x = layers.Conv2D(filters=32, kernel_size=(3,3), strides=(2,2), activation="relu", padding='valid', name='Deconv2')(x)
+    x = layers.BatchNormalization(scale=True)(x)
+
+    outputs = layers.Conv2D(filters=3, kernel_size=(9,9), strides=(1,1), activation="tanh", padding='same', name="Conv4")(x)
+
+    return keras.Model(inputs=inputs, outputs=outputs, name="transformNetConvs")
+
+
+
+### Medium network ###
+def get_medium_net():
+    """
+    Loads the transformation network.
+    """
+    pass
+
+
+
+### Tiny network ###
+def get_tiny_net():
     inputs = keras.Input(shape=(256,256,3), name="InputLayer")
     
     x = layers.Conv2D(filters=32, kernel_size=(9,9), strides=(1,1), activation="relu", padding='same', name="Conv1")(inputs)
@@ -68,4 +149,4 @@ def get_mini_model():
 
     outputs = layers.Conv2DTranspose(filters=3, kernel_size=(9,9), strides=(1,1), activation="tanh", padding='same', name="Deconv2")(x) 
     
-    return keras.Model(inputs=inputs, outputs=outputs, name="Mini_network")
+    return keras.Model(inputs=inputs, outputs=outputs, name="Tiny_net")

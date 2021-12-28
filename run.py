@@ -41,10 +41,14 @@ def generate_image(content_image_path, generated_image_path, model_weights_path,
     # Load the selected model.
     supported_network_architectures = networks.get_supported_architecture_names()
 
-    if model_weights_name == "transformNetwork":
-        network = networks.get_transformation_model()
-    elif model_weights_name == "miniNetwork":
-        network = networks.get_mini_model()
+    if model_weights_name == "transformNet":
+        network = networks.get_transform_net()
+    elif model_weights_name == "transformNetConvs":
+        network = networks.get_transform_net_convs()
+    elif model_weights_name == "mediumNet":
+        network = networks.get_medium_net()
+    elif model_weights_name == "tinyNet":
+        network = networks.get_tiny_net()
     else:
         print("Error! Model architecture name is invalid!\nValid architectures are:\n")
         [print(name) for name in supported_network_architectures]
