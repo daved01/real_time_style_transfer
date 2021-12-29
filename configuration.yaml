@@ -1,24 +1,37 @@
-# Paths
+# Configuration file
+#
+# Command line arguments overwrite the configuration from this file.
+
+
+# ===================================================================== #
+# Paths                                                                 #
+# ===================================================================== #
 content_image_path: "./data/content/"
 dataset_name: "all" # If empty content_image_path is the dataset folder.
 style_image_path: "./data/style/"
 model_weights_path: "models/"
 generated_image_path: "generated/"
 
-# Model architecture
-# Available: 
-# - transformNet
-# - transformNetConvs
-# - mediumNet
-# - tinyNet
-model_architecture: "transformNet"
 
+# ===================================================================== #
+# Model parameters                                                      #
+# Available architectures:                                              #
+# - transformNet                                                        #
+# - transformNetConvs                                                   #
+# - mediumNet                                                           # 
+# - tinyNet                                                             #
+# ===================================================================== #
+model_architecture: "tinyNet"
 # Set training image size. Format (height, width)
 image_size:
   tuple:
     - 256
     - 256
 
+
+# ===================================================================== #
+# Loss function parameters                                              #
+# ===================================================================== #
 # Define layers and their shapes for perceptual loss
 style_layers:
   block1_conv2: [256,256,64]

@@ -14,6 +14,7 @@ from tensorflow import keras
 from modules.loss_functions import get_loss_network
 from modules.loss_functions import compute_loss_and_grads
 import modules.networks as networks
+from modules import utils
 
 
 def get_dataset(content_image_path, batch_size, image_size=(256,256)):
@@ -64,10 +65,11 @@ def run_training(dataset_name, model_architecture_name, loss_net_activations, st
                 print("Current loss for one batch at step {:.0f}: {:.2f}".format(step, loss))
 
         if ((epoch+1) % save_epoch_interval == 0):
+            # TODO: REPLACE
             transform_network.save_weights(model_weights_path + model_architecture_name+"_" + dataset_name + "_"+style_image_name+"_batchsize"+str(batch_size)+"_epochs"+str(epoch+1)+".h5", save_format='h5')
             print("Saved latest model at epoch", epoch+1)
     
-  
+    # TODO: REPLACE
     transform_network.save_weights(model_weights_path + model_architecture_name+"_" + dataset_name + "_"+style_image_name+"_batchsize"+str(batch_size)+"_epochs"+str(epoch+1)+".h5", save_format='h5')
     print("Training completed!")
 
@@ -102,12 +104,13 @@ if __name__ == "__main__":
     dataset_name = config["dataset_name"]
     style_image_path = config["style_image_path"]
     model_weights_path = config["model_weights_path"]
-    model_architecture_config = config["model_architecture"]
+    model_architecture = config["model_architecture"]
     generated_image_path = config["generated_image_path"]
     raw = config["image_size"]['tuple']
     image_size = (int(raw[0]), int(raw[1]))
     content_layers = config["content_layers"]
     style_layers = config["style_layers"]
+
 
     # Parse model weights if given.
     if model_weights != None:
@@ -116,7 +119,7 @@ if __name__ == "__main__":
 
         # Checks
         # Model architecture from the weights is different to the one in the config file.
-        if model_architecture_weights != model_architecture_config:
+        if model_architecture_weights != model_architecture:
             print("Architecture name given in config is different from the one used for the given weights.\n" +
             "Using architecture from the weights.")
             model_architecture = model_architecture_weights
@@ -128,24 +131,10 @@ if __name__ == "__main__":
         print("Style image: " + str(style_image_name))
         print("Batch size: " + str(batch_size))
     
-    # If model weights are given, ignore the model from the config and load the architecture from the weight's name.
-    print("Loading model " + str(model_architecture) + " ...")
+    # Create folder for model weights and logging if it does not exist.
+    # Folder name: <model_name>_<dataset_name>_<style_image>_batchsize<batch_size>
+    model_weights_path = utils.create_folder_for_run(model_weights_path, model_architecture, dataset_name, style_image_name, batch_size)
 
-    transform_network = networks.load_architecture(model_architecture)
-    
-    # If loading failed exit.
-    if transform_network == -1:
-        exit()
-
-    if model_weights != None:
-        try:
-             # Model name: <model_name>_<dataset_name>_<style_image>_batchsize<batch_size>_epochs<num_epochs>.h5
-            print("Loading weights for model" + str(model_architecture) + " ...")
-            transform_network.load_weights(model_weights_path + model_weights + ".h5")
-        except OSError:
-            print("Error! Could not load file \"" + str(model_weights_path + model_weights + ".h5") + "\". Does it exist?")
-            exit()
-    
     # Load loss network
     print("Loading loss network...")
     loss_net_activations = get_loss_network()
@@ -159,6 +148,28 @@ if __name__ == "__main__":
         print("Error! Could not find style image \"" + str(style_image_name) + "\". Does it exist?")
         exit()
 
+    # If model weights are given, ignore the model from the config and load the architecture from the weight's name.
+    print("Loading model " + str(model_architecture) + " ...")
+
+    transform_network = networks.load_architecture(model_architecture)
+    
+    # If loading failed exit.
+    if transform_network == -1:
+        exit()
+
+    if model_weights != None:
+        try:
+             # Model name: <model_name>_<dataset_name>_<style_image>_batchsize<batch_size>_epochs<num_epochs>.h5
+            print("Loading weights for model" + str(model_architecture) + " ...")
+
+            transform_network.load_weights(model_weights_path + model_weights + ".h5")
+
+        except OSError:
+            print("Error! Could not load file \"" + str(model_weights_path + model_weights + ".h5") + "\". Does it exist?")
+            exit()
+    
     print("Starting training...")
+
+    # TODO: Check all argument variables. They all have to come from the config file and can be overwritten with arguments.
     run_training(dataset_name, model_architecture, loss_net_activations, style_image, style_image_name, total_num_epochs, weights_epochs, 
                     save_epoch_interval, batch_size, model_weights_path, content_layers, style_layers)

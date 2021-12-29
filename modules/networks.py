@@ -10,10 +10,10 @@ def get_supported_architecture_names():
     List of supported network architectures.
     """
     models = {
-        "transformNet": "xxx parameters, deconvolutions, residual blocks", 
+        "transformNet": "1,682,435 parameters, deconvolutions, residual blocks", 
         "transformNetConvs": "Like transformNet with deconvs replaced by convs and bilinear upsampling", 
-        "mediumNet": "xxx parameters, convolutions and bilinear upsampling", 
-        "tinyNet": "xxx parameters, convolutions and bilinear upsampling"
+        "mediumNet": "201,475 parameters, convolutions and bilinear upsampling", 
+        "tinyNet": "53,059 parameters, deconvolutions"
     }
     return models
 
@@ -107,14 +107,14 @@ def get_transform_net_convs():
     x = Blocks.residual_block(128,"4", x)
     x = Blocks.residual_block(128,"5", x)
 
-    # Deconvolutions
+    # Convolutions with resizing and padding.
     paddings = tf.constant([[0,0],[2,2],[2,2],[0,0]])
-    x = tf.image.resize(x, size=[253,253], method=tf.image.ResizeMethod.BILINEAR) #257
+    x = tf.image.resize(x, size=[253,253], method=tf.image.ResizeMethod.BILINEAR)
     x = tf.pad(x, paddings)
     x = layers.Conv2D(filters=64, kernel_size=(3,3), strides=(2,2), activation="relu", padding='valid', name="Deconv1")(x)
     x = layers.BatchNormalization(scale=True)(x)
 
-    x = tf.image.resize(x, size=[510,510], method=tf.image.ResizeMethod.BILINEAR) # 514
+    x = tf.image.resize(x, size=[510,510], method=tf.image.ResizeMethod.BILINEAR)
     x = tf.pad(x, paddings)
     x = layers.Conv2D(filters=32, kernel_size=(3,3), strides=(2,2), activation="relu", padding='valid', name='Deconv2')(x)
     x = layers.BatchNormalization(scale=True)(x)
@@ -128,9 +128,30 @@ def get_transform_net_convs():
 ### Medium network ###
 def get_medium_net():
     """
-    Loads the transformation network.
+    Loads the medium network.
     """
-    pass
+    inputs = keras.Input(shape=(256,256,3), name="InputLayer")
+    
+    x = layers.Conv2D(filters=32, kernel_size=(9,9), strides=(1,1), activation="relu", padding='same', name="Conv1")(inputs)
+    x = layers.BatchNormalization(scale=True)(x)
+
+    x = layers.Conv2D(filters=64, kernel_size=(3,3), strides=(2,2), activation="relu", padding='same', name="Conv2")(x)
+    x = layers.BatchNormalization(scale=True)(x)
+
+    x = layers.Conv2D(filters=128, kernel_size=(3,3), strides=(2,2), activation="relu", padding='same', name="Conv3")(x)
+    x = layers.BatchNormalization(scale=True)(x)
+
+    x = tf.image.resize(x, [256,256], method=tf.image.ResizeMethod.BILINEAR)
+    x = layers.Conv2D(filters=64, kernel_size=(3,3), strides=(2,2), activation="relu", padding='same', name="Deconv1")(x)
+    x = layers.BatchNormalization(scale=True)(x)
+
+    x = tf.image.resize(x, [512,512], method=tf.image.ResizeMethod.BILINEAR)
+    x = layers.Conv2D(filters=32, kernel_size=(3,3), strides=(2,2), activation="relu", padding='same', name="Deconv2")(x)
+    x = layers.BatchNormalization(scale=True)(x)
+
+    outputs = layers.Conv2D(filters=3, kernel_size=(9,9), strides=(1,1), activation="tanh", padding='same', name="Deconv3")(x) 
+    
+    return keras.Model(inputs=inputs, outputs=outputs, name="mediumNet")
 
 
 
@@ -149,4 +170,4 @@ def get_tiny_net():
 
     outputs = layers.Conv2DTranspose(filters=3, kernel_size=(9,9), strides=(1,1), activation="tanh", padding='same', name="Deconv2")(x) 
     
-    return keras.Model(inputs=inputs, outputs=outputs, name="Tiny_net")
+    return keras.Model(inputs=inputs, outputs=outputs, name="tinyNet")
