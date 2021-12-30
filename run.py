@@ -52,9 +52,8 @@ def generate_image(content_image_path, generated_image_path, model_weights_path,
         print("Error! Model architecture name is invalid!\nValid architectures are:\n")
         [print(name) for name in supported_network_architectures]
         exit()
-
     try:
-        network.load_weights(model_weights_path + "/" + model_name + ".h5")
+        network.load_weights("".join([model_weights_path, "/", model_name, ".h5"]))
     except BaseException:
         print("Error! Did not find model. Are your model name and the model_weights_path in configuration.yaml correct?")
         exit()
@@ -70,8 +69,8 @@ def generate_image(content_image_path, generated_image_path, model_weights_path,
     # <networkArchitecure>_<dataSet>_<style_image>_batchsize<batchSize>_epochs<numEpochs>.h5
     img = ImagePIL.fromarray(np.uint8(generated_image)).convert('RGB')
     style_image_name, epochs, batch_size = raw[2], raw[4].split(".")[0], raw[3]
-    filename = image_name + "_" + style_image_name + "_" + batch_size + "_" + epochs
-    img.save(generated_image_path + "/" + filename + ".png")
+    filename = "".join([image_name, "_", style_image_name, "_", batch_size, "_", epochs])
+    img.save("".join([generated_image_path, "/", filename, ".png"]))
     
 
 if __name__ == "__main__":
