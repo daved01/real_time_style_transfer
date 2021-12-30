@@ -35,24 +35,8 @@ def create_folder_for_run(model_weights_path, model_architecture, dataset_name, 
 
     # Create folder if it does not exist.
     try:
-        os.mkdir(model_weights_path + filename)
+        os.mkdir(model_weights_path + "/" + filename)
     except FileExistsError:
         pass
-    path = "".join([model_weights_path, filename, "/"])
+    path = "".join([model_weights_path, "/", filename])
     return path
-
-
-
-def save_model_weights():
-    """
-    Saves the weights to a folder. If folder does not exist, creates it.
-
-    """
-    pass
-    
-    
-
-
-# TODO: Check if it is still required!
-def load_model_weights():
-    pass
