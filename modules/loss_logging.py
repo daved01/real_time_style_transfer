@@ -41,12 +41,13 @@ class LossLogger:
             assert(len(self._epochs) == len(self._average_losses))
             assert(len(self._epochs) == len(self._timestamps))
 
-            # Check the epochs
+            # Check the epochs.
             try:
                 if self._epochs[-1] != epochs_ran:
-                    print("Warning! Last saved epoch is {:.0f}, but weights are from epoch {:.0f}! Starting at epoch {:.0f}.".format(
+                    print("Error! Last saved epoch is {:.0f}, but given weights are from epoch {:.0f}! Please start at epoch {:.0f}.".format(
                         self._epochs[-1], epochs_ran, epochs_ran)
                         )
+                    exit()
             except IndexError:
                 pass
 
@@ -55,6 +56,7 @@ class LossLogger:
         """
         Adds loss to accumulated loss.
         """
+        
         self._step_loss += loss
         self._step_counter += 1
 
@@ -63,6 +65,7 @@ class LossLogger:
         """
         Calculates average loss for epoch and resets the step couter.
         """
+        
         if self._step_counter == 0:
             return
         
@@ -73,7 +76,11 @@ class LossLogger:
         avg_loss = self._step_loss / self._step_counter
 
         # Append average loss to other averages
-        self._average_losses.append(avg_loss)
+        if len(self._epochs) == 0:
+            self._epochs.append(self._epochs_ran + 1)
+        else:
+            self._epochs.append(self._epochs[-1] + 1)
+        self._average_losses.append(avg_loss.numpy())
         self._timestamps.append(timestamp)
 
         # Reset steps counters
@@ -85,6 +92,7 @@ class LossLogger:
         """
         Calculates latest average epoch loss and writes all averages to disk.
         """
+        
         self.log_average_loss()
 
         # Format: Epoch, loss, date
@@ -96,7 +104,7 @@ class LossLogger:
             # Write header.
             f.writelines(["Epochs, ", "Loss, ", "Timestamp"])
             for i in range(len(self._epochs)):
-                f.writelines(["\n", str(self._epochs[i]), ",",str(self._average_losses[i]), ",",self._timestamps[i]])
+                f.writelines(["\n", str(self._epochs[i]), ",",str(self._average_losses[i]), ",", self._timestamps[i]])
 
 
     def plot(self):
@@ -106,10 +114,10 @@ class LossLogger:
         Name: 
         loss_<model_name>_<dataset_name>_<style_image>_batchsize<batch_size>_epochs<num_epochs>.png
         """
-        epochs = [epoch for epoch in range(self._epochs_ran+1, len(self._average_losses)+self._epochs_ran+1)]
+
         fig = plt.figure()
         plt.grid(True)
         plt.xlabel("Epoch")
         plt.ylabel("Loss")
-        plt.plot(epochs, self._average_losses, "o-", color='blue')
+        plt.plot(self._epochs, self._average_losses, "o-", color='blue')
         fig.savefig(self._path + "/" + self._filename + ".png", transparent=False)

@@ -6,11 +6,11 @@
 # ===================================================================== #
 # Paths                                                                 #
 # ===================================================================== #
-content_image_path: "./data/content/"
+content_image_path: "./data/content"
 dataset_name: "all" # If empty content_image_path is the dataset folder.
-style_image_path: "./data/style/"
-model_weights_path: "models/"
-generated_image_path: "generated/"
+style_image_path: "./data/style"
+model_weights_path: "models"
+generated_image_path: "generated"
 
 
 # ===================================================================== #
@@ -21,7 +21,7 @@ generated_image_path: "generated/"
 # - mediumNet                                                           # 
 # - tinyNet                                                             #
 # ===================================================================== #
-model_architecture: "tinyNet"
+model_architecture: "mediumNet"
 # Set training image size. Format (height, width)
 image_size:
   tuple:
