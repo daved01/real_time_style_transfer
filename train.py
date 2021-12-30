@@ -15,6 +15,7 @@ from modules.loss_functions import get_loss_network
 from modules.loss_functions import compute_loss_and_grads
 import modules.networks as networks
 from modules import utils
+from modules import loss_logging
 
 
 def get_dataset(content_image_path, batch_size, image_size=(256,256)):
@@ -50,28 +51,36 @@ def get_and_scale_image(image_path):
 
 def run_training(dataset_name, model_architecture_name, loss_net_activations, style_image, style_image_name, epochs, epochs_ran, save_epoch_interval, 
                 batch_size, model_weights_path, content_layers, style_layers):
+    
     optimizer = keras.optimizers.Adam(learning_rate=0.001)
     num_samples = len(dataset) * batch_size
+
+    # Initialize logger.
+    logger = loss_logging.LossLogger(model_weights_path, epochs_ran=epochs_ran)
     
     ## Custom training loop from scratch
     for epoch in range(epochs_ran, epochs):
         print("Running epoch %d / %d" %(epoch+1, epochs))
+          
         for step, image in enumerate(dataset):         
             # Scale image to range [0,1]
             image = image / 255.0
-            loss = compute_loss_and_grads(image, style_image, transform_network, optimizer, loss_net_activations, batch_size, content_layers, style_layers)    
+            loss = compute_loss_and_grads(image, style_image, transform_network, optimizer, loss_net_activations, batch_size, content_layers, style_layers)
+            logger.add(loss)
             # Print current batch-wise loss, 10 times per epoch.     
             if step > 10 and step % int(num_samples//10) == 0 or step <= 10:
                 print("Current loss for one batch at step {:.0f}: {:.2f}".format(step, loss))
 
         if ((epoch+1) % save_epoch_interval == 0):
-            # TODO: REPLACE
-            transform_network.save_weights(model_weights_path + model_architecture_name+"_" + dataset_name + "_"+style_image_name+"_batchsize"+str(batch_size)+"_epochs"+str(epoch+1)+".h5", save_format='h5')
+            transform_network.save_weights(model_weights_path + model_architecture_name + "_" + dataset_name + "_"+style_image_name + "_batchsize" + str(batch_size)+"_epochs"+str(epoch+1)+".h5", save_format='h5')
             print("Saved latest model at epoch", epoch+1)
+            logger.save()
     
-    # TODO: REPLACE
+    logger.log_average_loss()
     transform_network.save_weights(model_weights_path + model_architecture_name+"_" + dataset_name + "_"+style_image_name+"_batchsize"+str(batch_size)+"_epochs"+str(epoch+1)+".h5", save_format='h5')
     print("Training completed!")
+    logger.plot()
+    logger.save()
 
 
 if __name__ == "__main__":
@@ -105,7 +114,7 @@ if __name__ == "__main__":
     style_image_path = config["style_image_path"]
     model_weights_path = config["model_weights_path"]
     model_architecture = config["model_architecture"]
-    generated_image_path = config["generated_image_path"]
+    #generated_image_path = config["generated_image_path"]
     raw = config["image_size"]['tuple']
     image_size = (int(raw[0]), int(raw[1]))
     content_layers = config["content_layers"]
@@ -161,7 +170,6 @@ if __name__ == "__main__":
         try:
              # Model name: <model_name>_<dataset_name>_<style_image>_batchsize<batch_size>_epochs<num_epochs>.h5
             print("Loading weights for model" + str(model_architecture) + " ...")
-
             transform_network.load_weights(model_weights_path + model_weights + ".h5")
 
         except OSError:
@@ -169,7 +177,5 @@ if __name__ == "__main__":
             exit()
     
     print("Starting training...")
-
-    # TODO: Check all argument variables. They all have to come from the config file and can be overwritten with arguments.
     run_training(dataset_name, model_architecture, loss_net_activations, style_image, style_image_name, total_num_epochs, weights_epochs, 
                     save_epoch_interval, batch_size, model_weights_path, content_layers, style_layers)
