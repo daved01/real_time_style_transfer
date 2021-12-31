@@ -39,7 +39,7 @@ def generate_image(content_image_path, generated_image_path, model_weights_path,
 
     # Load the selected model.
     supported_network_architectures = networks.get_supported_architecture_names()
-
+    
     if model_weights_name == "transformNet":
         network = networks.get_transform_net()
     elif model_weights_name == "transformNetConvs":
@@ -49,8 +49,8 @@ def generate_image(content_image_path, generated_image_path, model_weights_path,
     elif model_weights_name == "tinyNet":
         network = networks.get_tiny_net()
     else:
-        print("Error! Model architecture name is invalid!\nValid architectures are:\n")
-        [print(name) for name in supported_network_architectures]
+        print("Error! Model architecture name is invalid!\nValid architectures are:\n")   
+        [print(name) for name in supported_network_architectures.keys()]
         exit()
     try:
         network.load_weights("".join([model_weights_path, "/", model_name, ".h5"]))
