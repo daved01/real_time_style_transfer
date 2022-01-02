@@ -53,7 +53,6 @@ def run_training(dataset_name, model_architecture_name, loss_net_activations, st
                 batch_size, model_weights_path, content_layers, style_layers, no_logs):
     
     optimizer = keras.optimizers.Adam(learning_rate=0.001)
-    num_samples = len(dataset) * batch_size
 
     # Initialize logger.
     logger = loss_logging.LossLogger(model_weights_path, epochs_ran=epochs_ran)
@@ -67,8 +66,9 @@ def run_training(dataset_name, model_architecture_name, loss_net_activations, st
             image = image / 255.0
             loss = compute_loss_and_grads(image, style_image, transform_network, optimizer, loss_net_activations, batch_size, content_layers, style_layers)
             logger.add(loss)
-            # TODO: Print current batch-wise loss, 10 times per epoch.
-            if step > 10 and step % int(num_samples//10) == 0 or step <= 10:
+
+            # Print current batch-wise loss, up to 10 times per epoch.
+            if len(dataset) > 10 and step % (len(dataset) // 10 ) == 0 or len(dataset) <= 10:
                 print("Current loss for one batch at step {:.0f}: {:.2f}".format(step, loss))
 
         if ((epoch+1) % save_epoch_interval == 0):
@@ -76,6 +76,7 @@ def run_training(dataset_name, model_architecture_name, loss_net_activations, st
             print("Saved latest model at epoch", epoch+1)
             if no_logs == False:
                 logger.save()
+                logger.plot()
     
         logger.log_average_loss()
     transform_network.save_weights(model_weights_path + "/" + model_architecture_name+"_" + dataset_name + "_"+style_image_name+"_batchsize"+str(batch_size)+"_epochs"+str(epoch+1)+".h5", save_format='h5')
