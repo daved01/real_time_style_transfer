@@ -87,28 +87,6 @@ def run_training(dataset_name, model_architecture_name, loss_net_activations, st
 
 
 if __name__ == "__main__":
-    # train.py --style <style_image_name> --epochs <total_num_epoch> --batchsize <batch_size> --weights <model_name> -logs
-    parser = argparse.ArgumentParser(description="Trains a model to transfer a content image into a style.")
-    parser.add_argument('--style', default=None, help="Provide name of the style image.")
-    parser.add_argument('--epochs', default=20, help="Set total number of epochs to train the model.")
-    parser.add_argument('--batchsize', default=1, help="Batch size used for training.")
-    parser.add_argument('--weights', default=None, help="Select weights of trained model to continue training.")
-    parser.add_argument('--saveepochs', default=2, help="Set after how many epochs a model is saved.")
-    parser.add_argument('-noLogs', default=False, action='store_const', const=True, help="Flag to disable loss logging.")
-
-    args = parser.parse_args()
-    style_image_name = args.style
-    total_num_epochs = int(args.epochs)
-    batch_size = int(args.batchsize)
-    save_epoch_interval = int(args.saveepochs)
-    model_weights = args.weights
-    no_logs = args.noLogs
-
-    # Checks
-    if model_weights == None and style_image_name == None:
-        print("Error! No style image name given as argument.")
-        exit()
-
     # Get configuration
     with open("./configuration.yaml") as file:
         config = yaml.load(file, yaml.FullLoader) 
@@ -122,6 +100,34 @@ if __name__ == "__main__":
     content_layers = config["content_layers"]
     style_layers = config["style_layers"]
     weights_epochs = 0 # Starting with the first epoch if nothing else is given later.
+    
+    # train.py --style <style_image_name> --epochs <total_num_epoch> --batchsize <batch_size> --weights <model_name> -logs
+    parser = argparse.ArgumentParser(description="Trains a model to transfer a content image into a style.")
+    parser.add_argument('--model', default=None, help="Select model architecture. Available models:\n" + str([name for name in networks.get_supported_architecture_names().keys()]))  
+    parser.add_argument('--resume', default=None, help="Select weight file to resume training with perceptual loss.")
+    parser.add_argument('--transfer', default=None, help="Select name of weights from pretraining with pixel loss.")
+    parser.add_argument('--epochs', default=20, help="Set total number of epochs to train the model.")
+    parser.add_argument('--batchsize', default=1, help="Batch size used for training.")
+    parser.add_argument('--style', default=None, help="Provide name of the style image.")
+    parser.add_argument('--saveepochs', default=2, help="Set after how many epochs a model is saved.")  
+    parser.add_argument('-pretraining', default=False, help="If selected, used a pixel loss to learn how to reconstruct the content images.") 
+    parser.add_argument('-noLogs', default=False, action='store_const', const=True, help="Flag to disable loss logging.")
+
+    args = parser.parse_args()
+    model_architecture = args.model
+    model_weights = args.resume
+    transfer_weights_pretraining = args.transfer
+    total_num_epochs = int(args.epochs)
+    batch_size = int(args.batchsize)
+    style_image_name = args.style
+    save_epoch_interval = int(args.saveepochs)
+    pretraining_mode = args.pretraining
+    no_logs = args.noLogs
+
+    # Checks
+    if model_weights == None and style_image_name == None:
+        print("Error! No style image name given as argument.")
+        exit()
 
     # Parse model weights if given.
     if model_weights != None:
