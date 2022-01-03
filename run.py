@@ -54,6 +54,7 @@ def generate_image(content_image_path, generated_image_path, model_weights_path,
         exit()
     try:
         network.load_weights("".join([model_weights_path, "/", model_name, ".h5"]))
+        
     except BaseException:
         print("Error! Did not find model. Are your model name and the model_weights_path in configuration.yaml correct?")
         exit()
