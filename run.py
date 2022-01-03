@@ -77,14 +77,14 @@ def generate_image(content_image_path, generated_image_path, model_weights_path,
 if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser(description="Convert an input image into a selected style.")
-    parser.add_argument('--model', default=None, help="Provide the name of a model specific model in the models folder."+
+    parser.add_argument('--weights', default=None, help="Provide the name of a weight file the models folder, without .h5 extension."+
                         "\nFormat: <networkArchitecure>_<dataSet>_<style_image>_batchsize<batchSize>_epochs<numEpochs>")
-    parser.add_argument('--allModels', default=None, help="Provide the name of a model folder. Iterates through all models.")
+    parser.add_argument('--allWeights', default=None, help="Provide the name of a model folder which containts model weight files. Iterates through all models.")
     parser.add_argument('--image', default=None, help="Provide the name of a content image in the folder data/content.")
     
     args = parser.parse_args()
-    model_name = args.model
-    model_folder_name = args.allModels
+    model_name = args.weights
+    model_folder_name = args.allWeights
     image_name = args.image
     
     # Check inputs
