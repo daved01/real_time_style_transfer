@@ -102,6 +102,7 @@ class LossLogger:
         # Save to file.
         with open(self._path + "/" + self._filename + self._fileextension, 'w') as f:
             # Write header.
+            f.writelines("Pretraining weights: \n")
             f.writelines(["Epochs, ", "Loss, ", "Timestamp"])
             for i in range(len(self._epochs)):
                 f.writelines(["\n", str(self._epochs[i]), ",",str(self._average_losses[i]), ",", self._timestamps[i]])

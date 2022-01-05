@@ -149,3 +149,4 @@ models/*
 !models/.gitignore
 
 experiments.csv
+configuration_latest.yaml
