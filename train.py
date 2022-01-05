@@ -104,13 +104,13 @@ if __name__ == "__main__":
     # train.py --style <style_image_name> --epochs <total_num_epoch> --batchsize <batch_size> --weights <model_name> -logs
     parser = argparse.ArgumentParser(description="Trains a model to transfer a content image into a style.")
     parser.add_argument('--model', default=None, help="Select model architecture. Available models:\n" + str([name for name in networks.get_supported_architecture_names().keys()]))  
-    parser.add_argument('--resume', default=None, help="Select weight file to resume training with perceptual loss.")
-    parser.add_argument('--transfer', default=None, help="Select name of weights from pretraining with pixel loss.")
+    parser.add_argument('--resume', default=None, help="Select weight file to resume training with.")
+    parser.add_argument('--transfer', default=None, help="Select name of weights for initialization.")
     parser.add_argument('--epochs', default=20, help="Set total number of epochs to train the model.")
     parser.add_argument('--batchsize', default=1, help="Batch size used for training.")
     parser.add_argument('--style', default=None, help="Provide name of the style image.")
     parser.add_argument('--saveepochs', default=2, help="Set after how many epochs a model is saved.")  
-    parser.add_argument('-pretraining', default=False, help="If selected, used a pixel loss to learn how to reconstruct the content images.") 
+    #parser.add_argument('-pretraining', default=False, help="If selected, used a pixel loss to learn how to reconstruct the content images.") 
     parser.add_argument('-noLogs', default=False, action='store_const', const=True, help="Flag to disable loss logging.")
 
     args = parser.parse_args()
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     batch_size = int(args.batchsize)
     style_image_name = args.style
     save_epoch_interval = int(args.saveepochs)
-    pretraining_mode = args.pretraining
+    #pretraining_mode = args.pretraining
     no_logs = args.noLogs
 
     # Checks
