@@ -77,7 +77,7 @@ def generate_image(content_image_path, generated_image_path, model_weights_path,
 if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser(description="Convert an input image into a selected style.")
-    parser.add_argument('--weights', default=None, help="Provide the name of a weight file the models folder, without .h5 extension."+
+    parser.add_argument('--weights', default=None, help="Provide the name of a weight file in the models folder, without .h5 extension."+
                         "\nFormat: <networkArchitecure>_<dataSet>_<style_image>_batchsize<batchSize>_epochs<numEpochs>")
     parser.add_argument('--allWeights', default=None, help="Provide the name of a model folder which containts model weight files. Iterates through all models.")
     parser.add_argument('--image', default=None, help="Provide the name of a content image in the folder data/content.")
